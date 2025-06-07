@@ -6,7 +6,7 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # صلاحية الرول المسموح بها (غير ID الأونر)
-ALLOWED_ROLE_ID = 123456789012345678  # ← عوّضها برقم رولك
+ALLOWED_ROLE_ID = 1381040767719706774  # ← عوّضها برقم رولك
 
 # ID الأونر (عنده كامل الصلاحيات)
 OWNER_ID = 898663928308060180
