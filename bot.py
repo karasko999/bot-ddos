@@ -7,7 +7,7 @@ import time
 
 OWNER_ID = 898663928308060180
 ALLOWED_ROLE_ID = 123456789012345678
-TOKEN = "YOUR_BOT_TOKEN"  # ضع التوكن الحقيقي هنا
+TOKEN = "token"
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -17,7 +17,7 @@ stop_event = threading.Event()
 
 @bot.event
 async def on_ready():
-    print(f"✅ نجمة DDoS متصل كـ {bot.user}")
+    print(f"✅ هجمة DDoS متصل كـ {bot.user}")
 
 @bot.command()
 async def attack(ctx, target: str, port: int, duration: int, method: str):
@@ -53,7 +53,7 @@ async def attack(ctx, target: str, port: int, duration: int, method: str):
     stop_event.clear()
 
     embed = discord.Embed(
-        title="🚀 نجمة DDoS - هجوم بدأ",
+        title="🚀  DDoS - هجوم بدأ",
         description=f"🎯 الهدف: `{target}:{port}`\n💣 الطريقة: `{method}`\n⏱️ المدة: `{duration}` ثانية",
         color=0x00ff00
     )
