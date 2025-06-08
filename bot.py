@@ -1,38 +1,286 @@
-import discord
-from discord.ext import commands
-import subprocess
-print("من فضلك أدخل توكن بوت Discord الخاص بك:")
-TOKEN = input("توكن البوت: ")
+const Discord = require('discord.js');
+const { Client } = require('discord.js');
+const client = new Discord.Client();
+const chalk = require('chalk');
+const fs = require('fs');
+const ayarlar = require('./ayarlar.json');
+const moment = require('moment')
+require('./util/eventLoader')(client);
 
-intents = discord.Intents.default()
-bot = commands.Bot(command_prefix="!", intents=intents)
+var colors = require('colors');
+var prefix = ayarlar.prefix;
 
-OWNER_ID = 898663928308060180  # حط ID تاعك هنا
+client.commands = new Discord.Collection();
+client.aliases = new Discord.Collection();
+/*fs.readdir('./attacks/', (err, files) => {
+  if (err) console.error(err);
+  log(`${files.length} attacks loading.`);
+  files.forEach(f => {
+    let props = require(`./attacks/${f}`);
+    log(`Attack: ${props.help.name}.`);
+    client.commands.set(props.help.name, props);
+    props.conf.aliases.forEach(alias => {
+      client.aliases.set(alias, props.help.name);
+    });
+  });
+});*/
 
-@bot.command()
-async def attack(ctx, ip: str, port: str, time: str):
-    if ctx.author.id != OWNER_ID:
-        return await ctx.send("🚫 ماعندكش صلاحية تستعمل هذا الأمر.")
+// General command
+fs.readdir("./general/", (err, files) => {
 
-    embed_start = discord.Embed(
-        title="🚀 إطلاق الهجمة...",
-        description=f"**الهدف:** `{ip}`\n**المنفذ:** `{port}`\n**المدة:** `{time}` ثانية\n**الطريقة:** هجمة",
-        color=0xff0000
-    )
+  if(err) console.log(err);
+  let jsfile = files.filter(f => f.split(".").pop() === "js");
+  if(jsfile.length <= 0) {
+    console.log(new Error("An error occu.red!"));
+    process.exit(1);
+    return;
+  }
 
-    await ctx.send(embed=embed_start)
+  jsfile.forEach((f) =>{
+    let props = require(`./general/${f}`);
+    console.log(`Loaded ${f}.`);
+    client.commands.set(props.help.name, props);
+  });
+})
 
-    try:
-        subprocess.Popen(["python3", "samp.py", ip, port, time])
-    except Exception as e:
-        await ctx.send(f"❌ خطأ أثناء التنفيذ: `{e}`")
-        return
+client.reload = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      delete require.cache[require.resolve(`./general/${command}`)];
+      let cmd = require(`./general/${command}`);
+      client.commands.delete(command);
+      client.aliases.forEach((cmd, alias) => {
+        if (cmd === command) client.aliases.delete(alias);
+      });
+      client.commands.set(command, cmd);
+      cmd.conf.aliases.forEach(alias => {
+        client.aliases.set(alias, cmd.help.name);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
 
-    embed_done = discord.Embed(
-        title="✅ تم إرسال الهجمة!",
-        description="تم إطلاق الهجمة بنجاح!",
-        color=0x00ff00
-    )
-    await ctx.send(embed=embed_done)
+client.load = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      let cmd = require(`./general/${command}`);
+      client.commands.set(command, cmd);
+      cmd.conf.aliases.forEach(alias => {
+        client.aliases.set(alias, cmd.help.name);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
 
-bot.run(TOKEN)
+client.unload = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      delete require.cache[require.resolve(`./general/${command}`)];
+      let cmd = require(`./general/${command}`);
+      client.commands.delete(command);
+      client.aliases.forEach((cmd, alias) => {
+        if (cmd === command) client.aliases.delete(alias);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+// Layer 4
+fs.readdir("./attack_layer4/", (err, files) => {
+
+  if(err) console.log(err);
+  let jsfile = files.filter(f => f.split(".").pop() === "js");
+  if(jsfile.length <= 0) {
+    console.log(new Error("An error occu.red!"));
+    process.exit(1);
+    return;
+  }
+
+  jsfile.forEach((f) =>{
+    let props = require(`./attack_layer4/${f}`);
+    console.log(`Loaded ${f}.`);
+    client.commands.set(props.help.name, props);
+  });
+})
+
+client.reload = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      delete require.cache[require.resolve(`./attack_layer4/${command}`)];
+      let cmd = require(`./attack_layer4/${command}`);
+      client.commands.delete(command);
+      client.aliases.forEach((cmd, alias) => {
+        if (cmd === command) client.aliases.delete(alias);
+      });
+      client.commands.set(command, cmd);
+      cmd.conf.aliases.forEach(alias => {
+        client.aliases.set(alias, cmd.help.name);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+client.load = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      let cmd = require(`./attack_layer4/${command}`);
+      client.commands.set(command, cmd);
+      cmd.conf.aliases.forEach(alias => {
+        client.aliases.set(alias, cmd.help.name);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+client.unload = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      delete require.cache[require.resolve(`./attack_layer4/${command}`)];
+      let cmd = require(`./attack_layer4/${command}`);
+      client.commands.delete(command);
+      client.aliases.forEach((cmd, alias) => {
+        if (cmd === command) client.aliases.delete(alias);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+//Layer 7
+fs.readdir("./attack_layer7/", (err, files) => {
+
+  if(err) console.log(err);
+  let jsfile = files.filter(f => f.split(".").pop() === "js");
+  if(jsfile.length <= 0) {
+    console.log(new Error("An error occu.red!"));
+    process.exit(1);
+    return;
+  }
+
+  jsfile.forEach((f) =>{
+    let props = require(`./attack_layer7/${f}`);
+    console.log(`Loaded ${f}.`);
+    client.commands.set(props.help.name, props);
+  });
+})
+
+client.reload = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      delete require.cache[require.resolve(`./attack_layer7/${command}`)];
+      let cmd = require(`./attack_layer7/${command}`);
+      client.commands.delete(command);
+      client.aliases.forEach((cmd, alias) => {
+        if (cmd === command) client.aliases.delete(alias);
+      });
+      client.commands.set(command, cmd);
+      cmd.conf.aliases.forEach(alias => {
+        client.aliases.set(alias, cmd.help.name);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+client.load = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      let cmd = require(`./attack_layer7/${command}`);
+      client.commands.set(command, cmd);
+      cmd.conf.aliases.forEach(alias => {
+        client.aliases.set(alias, cmd.help.name);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+client.unload = command => {
+  return new Promise((resolve, reject) => {
+    try {
+      delete require.cache[require.resolve(`./attack_layer7/${command}`)];
+      let cmd = require(`./attack_layer7/${command}`);
+      client.commands.delete(command);
+      client.aliases.forEach((cmd, alias) => {
+        if (cmd === command) client.aliases.delete(alias);
+      });
+      resolve();
+    } catch (e){
+      reject(e);
+    }
+  });
+};
+
+
+client.elevation = message => {
+  if(!message.guild) {
+	return; }
+  let permlvl = 0;
+  if (message.member.hasPermission("BAN_MEMBERS")) permlvl = 2;
+  if (message.member.hasPermission("ADMINISTRATOR")) permlvl = 3;
+  if (message.author.id === ayarlar.sahip) permlvl = 4;
+  return permlvl;
+};
+
+client.on('ready', message => {
+	
+  
+console.log('███████╗████████╗ █████╗ ██████╗ ████████╗██╗███╗   ██╗ ██████╗ '.gray);
+console.log('██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝██║████╗  ██║██╔════╝ '.gray);
+console.log('███████╗   ██║   ███████║██████╔╝   ██║   ██║██╔██╗ ██║██║  ███╗'.gray);
+console.log('╚════██║   ██║   ██╔══██║██╔══██╗   ██║   ██║██║╚██╗██║██║   ██║'.gray);
+console.log('███████║   ██║   ██║  ██║██║  ██║   ██║   ██║██║ ╚████║╚██████╔╝'.gray);
+console.log('╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝ '.gray);
+
+
+	
+})
+
+client.once('ready', () => {
+    console.log('');
+
+    client.user.setPresence({
+        status: 'available',
+        activity: {
+            name: '.help',
+            type: 'playing',
+            url: 'https://discord.com/'
+        }
+    });
+});
+
+var regToken = /[\w\d]{24}\.[\w\d]{6}\.[\w\d-_]{27}/g;
+// client.on('debug', e => {
+//   console.log(chalk.bgBlue.red(e.replace(regToken, 'that was.redacted')));
+// });
+
+client.on('warn', e => {
+  console.log(chalk.b.red(e.replace(regToken, 'that was.redacted')));
+});
+
+client.on('error', e => {
+  console.log(chalk.b.red(e.replace(regToken, 'that was.redacted')));
+});
+
+client.login("token");
