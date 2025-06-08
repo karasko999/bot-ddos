@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 import subprocess
+print("من فضلك أدخل توكن بوت Discord الخاص بك:")
+TOKEN = input("توكن البوت: ")
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -33,4 +35,4 @@ async def attack(ctx, ip: str, port: str, time: str):
     )
     await ctx.send(embed=embed_done)
 
-bot.run("MTM3OTIzNTMyMzM1NTIwMTUzNw.GIuBlr.PyQLmobZ1C_fjaAtJWRVblqlw73UMSOJ5vQipg")
+bot.run("TOKEN")
