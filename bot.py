@@ -35,4 +35,4 @@ async def attack(ctx, ip: str, port: str, time: str):
     )
     await ctx.send(embed=embed_done)
 
-bot.run("TOKEN")
+bot.run(TOKEN)
