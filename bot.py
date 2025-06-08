@@ -33,4 +33,4 @@ async def attack(ctx, ip: str, port: str, time: str):
     )
     await ctx.send(embed=embed_done)
 
-bot.run("توكن_البوت")
+bot.run("MTM3OTIzNTMyMzM1NTIwMTUzNw.GIuBlr.PyQLmobZ1C_fjaAtJWRVblqlw73UMSOJ5vQipg")
